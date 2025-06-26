@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crash Game Simulator</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background: #121212; color: #fff; padding: 2rem; }
+    #multiplier { font-size: 3rem; margin: 1rem 0; }
+    button { padding: 1rem 2rem; font-size: 1rem; margin: 1rem; border: none; border-radius: 10px; cursor: pointer; }
+    #betBtn { background-color: #00b894; color: #fff; }
+    #cashoutBtn { background-color: #d63031; color: #fff; }
+    #status { margin-top: 1rem; font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+  <h1>Crash Game Simulator</h1>
+  <div id="multiplier">1.00x</div>
+  <input type="number" id="betAmount" placeholder="Enter Bet Amount" />
+  <br />
+  <button id="betBtn">Start Bet</button>
+  <button id="cashoutBtn" disabled>Cash Out</button>
+  <div id="status"></div>
+
+  <script>
+    let multiplier = 1.0;
+    let interval;
+    let crashed = false;
+    let hasBet = false;
+    let betAmount = 0;
+
+    const multiplierEl = document.getElementById("multiplier");
+    const betBtn = document.getElementById("betBtn");
+    const cashoutBtn = document.getElementById("cashoutBtn");
+    const status = document.getElementById("status");
+
+    function startCrash() {
+      multiplier = 1.0;
+      multiplierEl.textContent = multiplier.toFixed(2) + "x";
+      crashed = false;
+      hasBet = true;
+      betAmount = parseFloat(document.getElementById("betAmount").value);
+      if (isNaN(betAmount) || betAmount <= 0) {
+        alert("Please enter a valid bet amount.");
+        return;
+      }
+      betBtn.disabled = true;
+      cashoutBtn.disabled = false;
+      status.textContent = "";
+
+      const crashAt = Math.random() * 5 + 1.5;
+      interval = setInterval(() => {
+        multiplier += 0.05;
+        multiplierEl.textContent = multiplier.toFixed(2) + "x";
+
+        if (multiplier >= crashAt) {
+          clearInterval(interval);
+          crashed = true;
+          cashoutBtn.disabled = true;
+          betBtn.disabled = false;
+          status.textContent = `💥 Crashed at ${multiplier.toFixed(2)}x - You lost ₹${betAmount}`;
+        }
+      }, 100);
+    }
+
+    function cashOut() {
+      if (!crashed && hasBet) {
+        clearInterval(interval);
+        let profit = betAmount * multiplier - betAmount;
+        status.textContent = `✅ Cashed out at ${multiplier.toFixed(2)}x - You won ₹${profit.toFixed(2)}`;
+        betBtn.disabled = false;
+        cashoutBtn.disabled = true;
+      }
+    }
+
+    betBtn.addEventListener("click", startCrash);
+    cashoutBtn.addEventListener("click", cashOut);
+  </script>
+</body>
+</html>
